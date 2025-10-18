@@ -15,12 +15,17 @@
             </a>
             <div class="volume-indicator"></div>
         </div>
-        <video class="mini-video-player" controls autoplay muted>
-            <source src="videos/tattoo-demo.mp4" type="video/mp4">
-            <!-- Placez votre vidéo tattoo-demo.mp4 dans le dossier videos/ -->
-            <!-- Vidéo de démonstration du salon de tatouage -->
-            Votre navigateur ne supporte pas la lecture vidéo.
-        </video>
+        <!-- Version alternative avec iframe YouTube pour GitHub Pages -->
+        <!-- Décommentez cette section si la vidéo locale ne fonctionne pas sur GitHub Pages -->
+        <!--
+        <iframe class="mini-video-player"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+        -->
     </div>
 
     <script>
@@ -42,49 +47,19 @@
 
                 // Activer le volume dès que la vidéo commence à jouer
                 video.addEventListener('play', function() {
-                    // Petit délai pour s'assurer que la vidéo est bien lancée
                     setTimeout(enableVolume, 100);
                 });
 
-                // Précharger la vidéo pour améliorer l'autoplay
-                video.preload = 'auto';
-
-                // Méthode plus robuste pour démarrer la vidéo
-                function startVideo() {
-                    // Essayer l'autoplay
-                    const playPromise = video.play();
-
-                    if (playPromise !== undefined) {
-                        playPromise.then(function() {
-                            console.log('Vidéo démarrée automatiquement avec succès');
-                            // Supprimer l'indicateur d'attente si présent
-                            video.classList.remove('video-waiting');
-                        }).catch(function(error) {
-                            console.log('Autoplay bloqué, en attente d\'interaction utilisateur:', error);
-
-                            // Afficher un indicateur visuel que la vidéo est prête
-                            video.style.cursor = 'pointer';
-                            video.title = 'Cliquez pour démarrer la vidéo';
-                            video.classList.add('video-waiting');
-
-                            // Forcer le démarrage après interaction
-                            const forcePlay = function() {
-                                video.play().then(function() {
-                                    console.log('Vidéo démarrée après interaction');
-                                    video.style.cursor = '';
-                                    video.title = '';
-                                    video.classList.remove('video-waiting');
-                                    video.removeEventListener('click', forcePlay);
-                                });
-                            };
-
-                            video.addEventListener('click', forcePlay);
+                // Gestion du clic pour démarrer la vidéo
+                video.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée manuellement');
+                        }).catch(function(e) {
+                            console.log('Erreur lors du démarrage:', e);
                         });
                     }
-                }
-
-                // Essayer de démarrer la vidéo automatiquement
-                startVideo();
+                });
 
                 // Écouter les événements de la vidéo
                 video.addEventListener('pause', function() {
@@ -98,21 +73,20 @@
                 // Gestion de la visibilité de la page (pour les navigateurs stricts)
                 document.addEventListener('visibilitychange', function() {
                     if (!document.hidden && video.paused) {
-                        startVideo();
-                    }
-                });
-
-                // Gestion du focus sur la fenêtre
-                window.addEventListener('focus', function() {
-                    if (video.paused) {
-                        startVideo();
+                        video.play().then(function() {
+                            console.log('Vidéo redémarrée après visibilité');
+                        }).catch(function(e) {
+                            console.log('Impossible de redémarrer:', e);
+                        });
                     }
                 });
 
                 // Gestion du clic sur le lecteur pour démarrer si autoplay bloqué
                 video.addEventListener('click', function() {
                     if (video.paused) {
-                        startVideo();
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée manuellement');
+                        });
                     }
                 });
             }
