@@ -15,10 +15,13 @@
             </a>
             <div class="volume-indicator"></div>
         </div>
-        <video class="mini-video-player" controls muted>
-            <source src="videos/tattoo-demo.mp4" type="video/mp4">
-            Votre navigateur ne supporte pas la lecture vidéo.
-        </video>
+        <div style="position: relative;">
+            <video class="mini-video-player" controls muted>
+                <source src="videos/tattoo-demo.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+            <div class="video-status" id="videoStatus">Chargement...</div>
+        </div>
     </div>
 
     <header style="text-align: center; padding: 3rem 1rem; background: rgba(0, 0, 0, 0.3);">
@@ -82,8 +85,32 @@
             const video = document.querySelector('.mini-video-player');
 
             if (video) {
+                console.log('Lecteur vidéo trouvé:', video);
+                console.log('Source de la vidéo:', video.querySelector('source')?.src);
+
                 // Précharger la vidéo pour améliorer les performances
                 video.preload = 'auto';
+                console.log('Préchargement activé');
+
+                // Écouter l'événement de chargement de la vidéo
+                video.addEventListener('loadeddata', function() {
+                    console.log('Vidéo chargée avec succès');
+                    document.getElementById('videoStatus').textContent = 'Prêt - Cliquez pour jouer';
+                });
+
+                video.addEventListener('error', function(e) {
+                    console.error('Erreur de chargement vidéo:', e);
+                    document.getElementById('videoStatus').textContent = 'Erreur de chargement';
+                });
+
+                // Écouter le démarrage de la vidéo
+                video.addEventListener('play', function() {
+                    document.getElementById('videoStatus').textContent = 'En lecture';
+                });
+
+                video.addEventListener('pause', function() {
+                    document.getElementById('videoStatus').textContent = 'En pause';
+                });
 
                 // Fonction pour activer le son dès le lancement
                 function enableVolume() {

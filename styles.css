@@ -104,6 +104,8 @@ body {
     border: 2px solid rgba(255, 255, 255, 0.2);
     background: #000;
     outline: none;
+    display: block; /* S'assurer que la vidéo est visible */
+    opacity: 1; /* S'assurer qu'elle n'est pas transparente */
 }
 
 .mini-video-player::-webkit-media-controls-panel {
@@ -556,6 +558,19 @@ header img.header-logo:hover {
     font-size: 0.9rem;
     position: relative;
     overflow: hidden;
+}
+
+/* Indicateur de statut de la vidéo */
+.video-status {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    opacity: 0.8;
 }
 
 .filter-btn::before {
