@@ -48,74 +48,116 @@ Dans `styles.css`, vous pouvez modifier :
 - **Tablette** : Lecteur 200x110px ajusté
 - **Mobile** : Lecteur centré en relatif (pas fixe)
 
-## Déploiement sur GitHub Pages - SOLUTION
+## Déploiement sur GitHub Pages
 
-### ✅ Solution recommandée : Iframe YouTube
+### Problèmes courants avec GitHub Pages
 
-**GitHub Pages bloque les vidéos locales mais supporte parfaitement YouTube :**
+**GitHub Pages a des restrictions strictes sur l'autoplay vidéo :**
+- ❌ **Autoplay bloqué** par défaut pour des raisons de sécurité
+- ❌ **Politiques CORS** peuvent bloquer le contenu local
+- ✅ **Solution recommandée** : Démarrage manuel de la vidéo
 
-**Configuration actuelle :**
+### Configuration pour GitHub Pages
+
+**1. Version actuelle (démarrage manuel) :**
 ```html
-<iframe class="mini-video-player"
-        src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0"
-        title="Présentation Santa Maria Ink"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
+<video controls muted> <!-- Pas d'autoplay -->
 ```
-
-**Avantages de YouTube :**
 - ✅ **Fonctionne parfaitement** sur GitHub Pages
-- ✅ **Pas de limite de taille** de fichier
-- ✅ **Streaming optimisé** par Google
-- ✅ **Support mobile** excellent
-- ✅ **Référencement SEO** automatique
+- ✅ **L'utilisateur clique** pour démarrer la vidéo
+- ✅ **Volume activé automatiquement** à 10% après le lancement
 
-### Comment utiliser :
-
-1. **Remplacez `VIDEO_ID`** par l'ID de votre vidéo YouTube
-2. **Obtenez l'ID** depuis l'URL YouTube : `https://www.youtube.com/watch?v=VIDEO_ID`
-3. **Personnalisez les paramètres** :
-   - `autoplay=0` : Pas de lecture automatique
-   - `mute=1` : Démarre muet (nécessaire pour certains navigateurs)
-   - `controls=1` : Affiche les contrôles
-   - `modestbranding=1` : Logo YouTube discret
-   - `rel=0` : Pas de vidéos suggérées à la fin
+**2. Version alternative avec iframe YouTube :**
+```html
+<iframe src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&mute=1&controls=1">
+```
+- ✅ **Support natif** par GitHub Pages
+- ✅ **Remplacez VIDEO_ID** par l'ID de votre vidéo YouTube
+- ✅ **Autoplay possible** avec `autoplay=1` après interaction
 
 ### Étapes pour déployer :
 
 1. **Pushez vos modifications** sur GitHub
-2. **Le lecteur YouTube fonctionne immédiatement** sur GitHub Pages
-3. **Testez l'intégration** - elle devrait être parfaite
-4. **Personnalisez la vidéo** en changeant l'ID YouTube
+2. **Activez GitHub Pages** dans les paramètres du repository
+3. **Testez le lecteur** - il devrait fonctionner en mode manuel
+4. **Si besoin**, décommentez la section iframe YouTube dans le HTML
 
-### Résolution de problèmes :
+### Résolution de problèmes GitHub Pages :
 
-- **Si l'iframe ne s'affiche pas** : Vérifiez que l'ID YouTube est correct
-- **Pour changer de vidéo** : Modifiez seulement l'ID dans l'URL src
-- **Pour l'autoplay** : Il est généralement bloqué sur GitHub Pages même avec YouTube
+- **Si la vidéo ne charge pas** : Vérifiez que le fichier vidéo existe dans le dossier `videos/`
+- **Si GitHub Pages ne sert pas la vidéo** : Utilisez une iframe YouTube à la place
+- **Pour l'autoplay** : Il est généralement bloqué sur GitHub Pages
 
 ## Code JavaScript
 ```javascript
-// Gestion du lecteur vidéo (YouTube)
+// Gestion du lecteur vidéo
 document.addEventListener('DOMContentLoaded', function() {
     const video = document.querySelector('.mini-video-player');
 
     if (video) {
-        console.log('Lecteur vidéo trouvé:', video);
-        console.log('Source de la vidéo:', video.src);
+        // Précharger la vidéo pour améliorer l'autoplay
+        video.preload = 'auto';
 
-        // Pour iframe YouTube, pas besoin de preload
-        console.log('Iframe YouTube détectée');
+        // Fonction pour activer le son dès le lancement
+        function enableVolume() {
+            // Enlever l'attribut muted si présent
+            if (video.muted) {
+                video.muted = false;
+            }
+            // Régler le volume à 10%
+            video.volume = 0.1;
+            console.log('Volume activé à 10%');
+        }
 
-        // Simuler les événements pour iframe YouTube
-        document.getElementById('videoStatus').textContent = 'Lecteur YouTube - Prêt';
-
-        // Écouter les clics sur l'iframe (approximation)
-        video.addEventListener('load', function() {
-            console.log('Iframe YouTube chargée');
-            document.getElementById('videoStatus').textContent = 'YouTube - Prêt à jouer';
+        // Activer le volume dès que la vidéo commence à jouer
+        video.addEventListener('play', function() {
+            setTimeout(enableVolume, 100);
         });
+
+        // Méthode robuste pour démarrer la vidéo
+        function startVideo() {
+            const playPromise = video.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(function() {
+                    console.log('Vidéo démarrée automatiquement');
+                    video.classList.remove('video-waiting');
+                }).catch(function(error) {
+                    console.log('Autoplay bloqué:', error);
+                    // Afficher l'indicateur d'attente
+                    video.classList.add('video-waiting');
+                    video.style.cursor = 'pointer';
+                    video.title = 'Cliquez pour démarrer la vidéo';
+
+                    // Forcer le démarrage après interaction
+                    const forcePlay = function() {
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée après interaction');
+                            video.classList.remove('video-waiting');
+                            video.style.cursor = '';
+                            video.title = '';
+                        });
+                    };
+
+                    video.addEventListener('click', forcePlay);
+                });
+            }
+        }
+
+        // Fallbacks pour les navigateurs stricts
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && video.paused) {
+                startVideo();
+            }
+        });
+
+        window.addEventListener('focus', function() {
+            if (video.paused) {
+                startVideo();
+            }
+        });
+
+        // Démarrer la vidéo automatiquement
+        startVideo();
     }
 });

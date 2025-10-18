@@ -16,15 +16,11 @@
             <div class="volume-indicator"></div>
         </div>
         <div style="position: relative;">
-            <!-- Lecteur YouTube intégré pour GitHub Pages -->
-            <iframe class="mini-video-player"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0"
-                    title="Présentation Santa Maria Ink"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-            </iframe>
-            <div class="video-status" id="videoStatus">Lecteur YouTube - Prêt</div>
+            <video class="mini-video-player" controls muted>
+                <source src="videos/tattoo-demo.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+            <div class="video-status" id="videoStatus">Chargement...</div>
         </div>
         <!-- Version alternative avec iframe YouTube pour les navigateurs problématiques -->
         <!-- Décommentez cette section si la vidéo locale ne fonctionne pas -->
@@ -46,18 +42,86 @@
 
             if (video) {
                 console.log('Lecteur vidéo trouvé:', video);
-                console.log('Source de la vidéo:', video.src);
+                console.log('Source de la vidéo:', video.querySelector('source')?.src);
 
-                // Pour iframe YouTube, pas besoin de preload
-                console.log('Iframe YouTube détectée');
+                // Précharger la vidéo pour améliorer les performances
+                video.preload = 'auto';
+                console.log('Préchargement activé');
 
-                // Simuler les événements pour iframe YouTube
-                document.getElementById('videoStatus').textContent = 'Lecteur YouTube - Prêt';
+                // Écouter l'événement de chargement de la vidéo
+                video.addEventListener('loadeddata', function() {
+                    console.log('Vidéo chargée avec succès');
+                    document.getElementById('videoStatus').textContent = 'Prêt - Cliquez pour jouer';
+                });
 
-                // Écouter les clics sur l'iframe (approximation)
-                video.addEventListener('load', function() {
-                    console.log('Iframe YouTube chargée');
-                    document.getElementById('videoStatus').textContent = 'YouTube - Prêt à jouer';
+                video.addEventListener('error', function(e) {
+                    console.error('Erreur de chargement vidéo:', e);
+                    document.getElementById('videoStatus').textContent = 'Erreur de chargement';
+                });
+
+                // Écouter le démarrage de la vidéo
+                video.addEventListener('play', function() {
+                    document.getElementById('videoStatus').textContent = 'En lecture';
+                });
+
+                video.addEventListener('pause', function() {
+                    document.getElementById('videoStatus').textContent = 'En pause';
+                });
+
+                // Fonction pour activer le son dès le lancement
+                function enableVolume() {
+                    // Enlever l'attribut muted si présent
+                    if (video.muted) {
+                        video.muted = false;
+                    }
+                    // Régler le volume à 10%
+                    video.volume = 0.1;
+                    console.log('Volume activé à 10%');
+                }
+
+                // Activer le volume dès que la vidéo commence à jouer
+                video.addEventListener('play', function() {
+                    setTimeout(enableVolume, 100);
+                });
+
+                // Gestion du clic pour démarrer la vidéo
+                video.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée manuellement');
+                        }).catch(function(e) {
+                            console.log('Erreur lors du démarrage:', e);
+                        });
+                    }
+                });
+
+                // Écouter les événements de la vidéo
+                video.addEventListener('pause', function() {
+                    console.log('Vidéo mise en pause');
+                });
+
+                video.addEventListener('ended', function() {
+                    console.log('Vidéo terminée');
+                });
+
+                // Gestion de la visibilité de la page (pour les navigateurs stricts)
+                document.addEventListener('visibilitychange', function() {
+                    if (!document.hidden && video.paused) {
+                        video.play().then(function() {
+                            console.log('Vidéo redémarrée après visibilité');
+                        }).catch(function(e) {
+                            console.log('Impossible de redémarrer:', e);
+                        });
+                    }
+                });
+
+                // Gestion du clic sur le lecteur pour démarrer si autoplay bloqué
+                video.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée manuellement');
+                        });
+                    }
                 });
             }
         });
