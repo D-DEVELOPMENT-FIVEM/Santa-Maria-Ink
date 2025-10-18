@@ -50,43 +50,44 @@ Dans `styles.css`, vous pouvez modifier :
 
 ## Déploiement sur GitHub Pages
 
-### Problèmes courants avec GitHub Pages
+### ⚠️ Limitation importante : Autoplay bloqué
 
-**GitHub Pages a des restrictions strictes sur l'autoplay vidéo :**
-- ❌ **Autoplay bloqué** par défaut pour des raisons de sécurité
-- ❌ **Politiques CORS** peuvent bloquer le contenu local
-- ✅ **Solution recommandée** : Démarrage manuel de la vidéo
+**GitHub Pages bloque systématiquement l'autoplay vidéo pour des raisons de sécurité :**
+- ❌ **Autoplay impossible** sur GitHub Pages (politique stricte)
+- ❌ **Même avec `muted`** et autres techniques de contournement
+- ✅ **Seule solution** : Démarrage manuel ou iframe YouTube
 
-### Configuration pour GitHub Pages
+### Solutions pour GitHub Pages
 
-**1. Version actuelle (démarrage manuel) :**
+**1. Version actuelle (avec autoplay) :**
 ```html
-<video controls muted> <!-- Pas d'autoplay -->
+<video controls autoplay muted>
 ```
-- ✅ **Fonctionne parfaitement** sur GitHub Pages
-- ✅ **L'utilisateur clique** pour démarrer la vidéo
+- ✅ **Fonctionne parfaitement** en développement local
+- ❌ **Autoplay bloqué** sur GitHub Pages
+- ✅ **L'utilisateur peut cliquer** pour démarrer la vidéo
 - ✅ **Volume activé automatiquement** à 10% après le lancement
 
-**2. Version alternative avec iframe YouTube :**
+**2. Version recommandée pour GitHub Pages :**
 ```html
 <iframe src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&mute=1&controls=1">
 ```
 - ✅ **Support natif** par GitHub Pages
 - ✅ **Remplacez VIDEO_ID** par l'ID de votre vidéo YouTube
-- ✅ **Autoplay possible** avec `autoplay=1` après interaction
+- ✅ **Autoplay possible** avec interaction utilisateur
 
 ### Étapes pour déployer :
 
-1. **Pushez vos modifications** sur GitHub
-2. **Activez GitHub Pages** dans les paramètres du repository
-3. **Testez le lecteur** - il devrait fonctionner en mode manuel
-4. **Si besoin**, décommentez la section iframe YouTube dans le HTML
+1. **Testez en local** - l'autoplay devrait fonctionner
+2. **Pushez sur GitHub** - l'autoplay sera bloqué sur GitHub Pages
+3. **Pour GitHub Pages**, décommentez la section iframe YouTube dans le HTML
+4. **Alternative** : Utilisez YouTube directement
 
-### Résolution de problèmes GitHub Pages :
+### Résolution de problèmes :
 
-- **Si la vidéo ne charge pas** : Vérifiez que le fichier vidéo existe dans le dossier `videos/`
-- **Si GitHub Pages ne sert pas la vidéo** : Utilisez une iframe YouTube à la place
-- **Pour l'autoplay** : Il est généralement bloqué sur GitHub Pages
+- **Si l'autoplay ne fonctionne pas** : C'est normal sur GitHub Pages
+- **Pour avoir de l'autoplay** : Utilisez une iframe YouTube avec les paramètres appropriés
+- **Pour le développement local** : L'autoplay fonctionne normalement
 
 ## Code JavaScript
 ```javascript
