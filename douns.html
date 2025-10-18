@@ -15,7 +15,7 @@
             </a>
             <div class="volume-indicator"></div>
         </div>
-        <video class="mini-video-player" controls autoplay muted>
+        <video class="mini-video-player" controls muted>
             <source src="videos/tattoo-demo.mp4" type="video/mp4">
             Votre navigateur ne supporte pas la lecture vidéo.
         </video>
@@ -82,7 +82,7 @@
             const video = document.querySelector('.mini-video-player');
 
             if (video) {
-                // Précharger la vidéo pour améliorer l'autoplay
+                // Précharger la vidéo pour améliorer les performances
                 video.preload = 'auto';
 
                 // Fonction pour activer le son dès le lancement
@@ -101,51 +101,36 @@
                     setTimeout(enableVolume, 100);
                 });
 
-                // Méthode robuste pour démarrer la vidéo
-                function startVideo() {
-                    const playPromise = video.play();
-
-                    if (playPromise !== undefined) {
-                        playPromise.then(function() {
-                            console.log('Vidéo démarrée automatiquement');
-                            video.classList.remove('video-waiting');
-                        }).catch(function(error) {
-                            console.log('Autoplay bloqué:', error);
-                            // Afficher l'indicateur d'attente
-                            video.classList.add('video-waiting');
-                            video.style.cursor = 'pointer';
-                            video.title = 'Cliquez pour démarrer la vidéo';
-
-                            // Forcer le démarrage après interaction
-                            const forcePlay = function() {
-                                video.play().then(function() {
-                                    console.log('Vidéo démarrée après interaction');
-                                    video.classList.remove('video-waiting');
-                                    video.style.cursor = '';
-                                    video.title = '';
-                                });
-                            };
-
-                            video.addEventListener('click', forcePlay);
+                // Gestion du clic pour démarrer la vidéo
+                video.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play().then(function() {
+                            console.log('Vidéo démarrée manuellement');
+                        }).catch(function(e) {
+                            console.log('Erreur lors du démarrage:', e);
                         });
                     }
-                }
+                });
 
-                // Fallbacks pour les navigateurs stricts
+                // Écouter les événements de la vidéo
+                video.addEventListener('pause', function() {
+                    console.log('Vidéo mise en pause');
+                });
+
+                video.addEventListener('ended', function() {
+                    console.log('Vidéo terminée');
+                });
+
+                // Gestion de la visibilité de la page (pour les navigateurs stricts)
                 document.addEventListener('visibilitychange', function() {
                     if (!document.hidden && video.paused) {
-                        startVideo();
+                        video.play().then(function() {
+                            console.log('Vidéo redémarrée après visibilité');
+                        }).catch(function(e) {
+                            console.log('Impossible de redémarrer:', e);
+                        });
                     }
                 });
-
-                window.addEventListener('focus', function() {
-                    if (video.paused) {
-                        startVideo();
-                    }
-                });
-
-                // Démarrer la vidéo automatiquement
-                startVideo();
             }
         });
     </script>
