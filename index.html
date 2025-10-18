@@ -7,6 +7,118 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Lecteur vidéo en haut à droite -->
+    <div class="video-player-container">
+        <div class="video-logo"> 
+            <a href="https://www.youtube.com/@Label_Naps">
+                <img src="images/label.png" alt="Label_Naps" class="video-logo-img">
+            </a>
+            <div class="volume-indicator"></div>
+        </div>
+        <video class="mini-video-player" controls autoplay muted>
+            <source src="videos/tattoo-demo.mp4" type="video/mp4">
+            <!-- Placez votre vidéo tattoo-demo.mp4 dans le dossier videos/ -->
+            <!-- Vidéo de démonstration du salon de tatouage -->
+            Votre navigateur ne supporte pas la lecture vidéo.
+        </video>
+    </div>
+
+    <script>
+        // Gestion du lecteur vidéo
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.querySelector('.mini-video-player');
+
+            if (video) {
+                // Fonction pour activer le son dès le lancement
+                function enableVolume() {
+                    // Enlever l'attribut muted si présent
+                    if (video.muted) {
+                        video.muted = false;
+                    }
+                    // Régler le volume à 10%
+                    video.volume = 0.1;
+                    console.log('Volume activé à 10%');
+                }
+
+                // Activer le volume dès que la vidéo commence à jouer
+                video.addEventListener('play', function() {
+                    // Petit délai pour s'assurer que la vidéo est bien lancée
+                    setTimeout(enableVolume, 100);
+                });
+
+                // Précharger la vidéo pour améliorer l'autoplay
+                video.preload = 'auto';
+
+                // Méthode plus robuste pour démarrer la vidéo
+                function startVideo() {
+                    // Essayer l'autoplay
+                    const playPromise = video.play();
+
+                    if (playPromise !== undefined) {
+                        playPromise.then(function() {
+                            console.log('Vidéo démarrée automatiquement avec succès');
+                            // Supprimer l'indicateur d'attente si présent
+                            video.classList.remove('video-waiting');
+                        }).catch(function(error) {
+                            console.log('Autoplay bloqué, en attente d\'interaction utilisateur:', error);
+
+                            // Afficher un indicateur visuel que la vidéo est prête
+                            video.style.cursor = 'pointer';
+                            video.title = 'Cliquez pour démarrer la vidéo';
+                            video.classList.add('video-waiting');
+
+                            // Forcer le démarrage après interaction
+                            const forcePlay = function() {
+                                video.play().then(function() {
+                                    console.log('Vidéo démarrée après interaction');
+                                    video.style.cursor = '';
+                                    video.title = '';
+                                    video.classList.remove('video-waiting');
+                                    video.removeEventListener('click', forcePlay);
+                                });
+                            };
+
+                            video.addEventListener('click', forcePlay);
+                        });
+                    }
+                }
+
+                // Essayer de démarrer la vidéo automatiquement
+                startVideo();
+
+                // Écouter les événements de la vidéo
+                video.addEventListener('pause', function() {
+                    console.log('Vidéo mise en pause');
+                });
+
+                video.addEventListener('ended', function() {
+                    console.log('Vidéo terminée');
+                });
+
+                // Gestion de la visibilité de la page (pour les navigateurs stricts)
+                document.addEventListener('visibilitychange', function() {
+                    if (!document.hidden && video.paused) {
+                        startVideo();
+                    }
+                });
+
+                // Gestion du focus sur la fenêtre
+                window.addEventListener('focus', function() {
+                    if (video.paused) {
+                        startVideo();
+                    }
+                });
+
+                // Gestion du clic sur le lecteur pour démarrer si autoplay bloqué
+                video.addEventListener('click', function() {
+                    if (video.paused) {
+                        startVideo();
+                    }
+                });
+            }
+        });
+    </script>
+
     <header>
         <img src="images/logo.png" alt="Santa Maria Ink Logo" class="header-logo">
         <h1>Santa Maria Ink</h1>
@@ -52,7 +164,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 Tattoo Shop FiveM</p>
+        <p>&copy; 2025 Fait par <a href="https://www.youtube.com/@Douns" class="footer-link">Douns</a> pour la Marabunta</p>
     </footer>
 </body>
 </html>
