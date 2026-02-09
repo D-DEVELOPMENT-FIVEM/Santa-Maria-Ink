@@ -105,10 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (nameMatch && matchesFilter) {
                 card.style.display = 'block';
-                // Ajouter la classe pour l'animation de réapparition
-                setTimeout(() => {
-                    card.classList.add('show');
-                }, index * 50); // Délai échelonné pour chaque carte
+                card.classList.add('show');
                 visibleCount++;
             } else {
                 card.style.display = 'none';
